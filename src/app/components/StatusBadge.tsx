@@ -1,5 +1,12 @@
 interface StatusBadgeProps {
-  status: 'entregue' | 'producao' | 'atrasado' | 'pendente' | 'aprovado' | 'rejeitado';
+  status:
+  | 'entregue'
+  | 'producao'
+  | 'atrasado'
+  | 'pendente'
+  | 'aprovado'
+  | 'rejeitado'
+  | 'aguardando';
 }
 
 const statusConfig = {
@@ -9,6 +16,7 @@ const statusConfig = {
   pendente: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Pendente' },
   aprovado: { bg: 'bg-green-100', text: 'text-green-700', label: 'Aprovado' },
   rejeitado: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejeitado' },
+  aguardando: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Aguardando' },
 };
 
 export function StatusBadge({ status }: StatusBadgeProps) {

@@ -36,6 +36,10 @@ export interface Cliente {
 interface ClientesContextType {
   clientes: Cliente[];
   cadastrarCliente: (cliente: Omit<Cliente, 'id'>) => Promise<void>;
+  editarCliente: (
+    id: number,
+    cliente: Partial<Omit<Cliente, 'id'>>
+  ) => Promise<void>;
   inativar: (ids: number[]) => Promise<void>;
   reativar: (id: number) => Promise<void>;
 }
@@ -121,11 +125,37 @@ export function ClientesProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const editarCliente = async (
+    id: number,
+    clienteAtualizado: Partial<Omit<Cliente, 'id'>>
+  ) => {
+    const { data, error } = await supabase
+      .from('clientes')
+      .update(clienteAtualizado)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Erro ao editar cliente:', error);
+      return;
+    }
+
+    setClientes((prev) =>
+      prev.map((cliente) =>
+        cliente.id === id
+          ? (data as Cliente)
+          : cliente
+      )
+    );
+  };
+
   return (
     <ClientesContext.Provider
       value={{
         clientes,
         cadastrarCliente,
+        editarCliente,
         inativar,
         reativar,
       }}
