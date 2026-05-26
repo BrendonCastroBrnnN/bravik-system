@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from './context/ThemeContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -26,6 +28,32 @@ console.error = (...args: any[]) => {
   originalError(...args);
 };
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const [loading, setLoading] = useState(true);
+  const [autenticado, setAutenticado] = useState(false);
+
+  useEffect(() => {
+    async function verificarSessao() {
+      const { data } = await supabase.auth.getSession();
+
+      setAutenticado(!!data.session);
+      setLoading(false);
+    }
+
+    verificarSessao();
+  }, []);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
+
+  if (!autenticado) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -37,17 +65,18 @@ export default function App() {
         <Toaster position="top-right" richColors />
         <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/clientes" element={<Clientes />} />
-        <Route path="/clientes/:id" element={<ClienteDetalhes />} />
-        <Route path="/pedidos" element={<Pedidos />} />
-        <Route path="/pedidos/:id" element={<PedidoDetalhes />} />
-        <Route path="/producao" element={<Producao />} />
-        <Route path="/orcamentos" element={<Orcamentos />} />
-        <Route path="/orcamentos/:id" element={<OrcamentoDetalhes />} />
-        <Route path="/relatorios" element={<Relatorios />} />
-        <Route path="/configuracoes" element={<Configuracoes />} />
+<Route path="/login" element={<Login />} />
+
+<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+<Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+<Route path="/clientes/:id" element={<ProtectedRoute><ClienteDetalhes /></ProtectedRoute>} />
+<Route path="/pedidos" element={<ProtectedRoute><Pedidos /></ProtectedRoute>} />
+<Route path="/pedidos/:id" element={<ProtectedRoute><PedidoDetalhes /></ProtectedRoute>} />
+<Route path="/producao" element={<ProtectedRoute><Producao /></ProtectedRoute>} />
+<Route path="/orcamentos" element={<ProtectedRoute><Orcamentos /></ProtectedRoute>} />
+<Route path="/orcamentos/:id" element={<ProtectedRoute><OrcamentoDetalhes /></ProtectedRoute>} />
+<Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+<Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
       </ProducaoProvider>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, User, Settings, LogOut, ChevronDown, Menu, ShoppingCart, CheckCircle, Package, Truck, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications, NotificationType } from '../../context/NotificationContext';
+import { supabase } from '../../../lib/supabaseClient';
 
 interface TopbarProps {
   onMenuClick?: () => void;
@@ -60,9 +61,16 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showNotifications]);
 
-  const handleSair = () => {
-    navigate('/login');
+  const handleSair = async () => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error('Erro ao sair:', error);
+      return;
+    }
+
     setShowDropdown(false);
+    navigate('/login');
   };
 
   const handleConfiguracoes = () => {
@@ -127,9 +135,8 @@ export function Topbar({ onMenuClick }: TopbarProps) {
                     <button
                       key={n.id}
                       onClick={() => markAsRead(n.id)}
-                      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${
-                        !n.read ? 'bg-blue-50 dark:bg-blue-950/40' : ''
-                      }`}
+                      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700 ${!n.read ? 'bg-blue-50 dark:bg-blue-950/40' : ''
+                        }`}
                     >
                       {notifIcon(n.type)}
                       <div className="flex-1 min-w-0">

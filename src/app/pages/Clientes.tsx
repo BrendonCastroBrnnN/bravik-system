@@ -34,7 +34,7 @@ const filtroOpcoes: { value: FiltroStatus; label: string }[] = [
 
 export function Clientes() {
   const navigate = useNavigate();
-  const { clientes, inativar, reativar } = useClientes();
+  const { clientes, cadastrarCliente, inativar, reativar } = useClientes();
 
   const [showModal, setShowModal] = useState(false);
   const [searchNome, setSearchNome] = useState('');
@@ -42,6 +42,41 @@ export function Clientes() {
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>('todos');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showConfirmInativo, setShowConfirmInativo] = useState(false);
+
+  const [novoCliente, setNovoCliente] = useState({
+    nome: '',
+    cnpj: '',
+    responsavel: '',
+    telefone: '',
+    email: '',
+    endereco: '',
+  });
+
+  const handleSalvarCliente = async () => {
+    await cadastrarCliente({
+      nome: novoCliente.nome,
+      cnpj: novoCliente.cnpj,
+      responsavel: novoCliente.responsavel,
+      telefone: novoCliente.telefone,
+      email: novoCliente.email,
+      endereco: novoCliente.endereco,
+      ultimaCompra: new Date().toISOString().split('T')[0],
+      inativo: false,
+      orcamentos: [],
+      pedidos: [],
+    });
+
+    setNovoCliente({
+      nome: '',
+      cnpj: '',
+      responsavel: '',
+      telefone: '',
+      email: '',
+      endereco: '',
+    });
+
+    setShowModal(false);
+  };
 
   const clientesFiltrados = clientes.filter((c) => {
     if (filtroStatus === 'inativos') return c.inativo;
@@ -191,7 +226,7 @@ export function Clientes() {
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={() => {}}
+                              onChange={() => { }}
                               className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer"
                             />
                           </td>
@@ -284,16 +319,48 @@ export function Clientes() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Dados da Empresa</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <input type="text" placeholder="Razão Social" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input
+                      type="text"
+                      placeholder="Razão Social"
+                      value={novoCliente.nome}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, nome: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                     <input type="text" placeholder="Nome Fantasia" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <input type="text" placeholder="CNPJ" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input
+                      type="text"
+                      placeholder="CNPJ"
+                      value={novoCliente.cnpj}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, cnpj: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Contato</h3>
                   <div className="grid grid-cols-2 gap-4">
-                    <input type="email" placeholder="Email" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <input type="tel" placeholder="Telefone" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input
+  type="email"
+  placeholder="Email"
+  value={novoCliente.email}
+  onChange={(e) =>
+    setNovoCliente({ ...novoCliente, email: e.target.value })
+  }
+  className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+                    <input
+  type="tel"
+  placeholder="Telefone"
+  value={novoCliente.telefone}
+  onChange={(e) =>
+    setNovoCliente({ ...novoCliente, telefone: e.target.value })
+  }
+  className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
                   </div>
                 </div>
                 <div>
@@ -307,7 +374,7 @@ export function Clientes() {
                   <button onClick={() => setShowModal(false)} className="h-12 px-6 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     Cancelar
                   </button>
-                  <button onClick={() => setShowModal(false)} className="h-12 px-6 bg-[#2563EB] text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                  <button onClick={handleSalvarCliente} className="h-12 px-6 bg-[#2563EB] text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
                     Salvar Cliente
                   </button>
                 </div>

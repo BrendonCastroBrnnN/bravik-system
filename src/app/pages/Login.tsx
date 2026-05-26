@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import bravikLogo from '@/imports/BravikBG.png';
+import bravikLogo from '../../imports/BravikBG.png';
+import { supabase } from '../../lib/supabaseClient';
 
 export function Login() {
   const navigate = useNavigate();
@@ -8,15 +9,29 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError('Preencha o e-mail e a senha para continuar.');
-      return;
-    }
-    setError('');
-    navigate('/dashboard');
-  };
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (!email.trim() || !password.trim()) {
+    setError('Preencha o e-mail e a senha para continuar.');
+    return;
+  }
+
+  setError('');
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    setError('E-mail ou senha inválidos.');
+    console.error(error);
+    return;
+  }
+
+  navigate('/dashboard');
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
