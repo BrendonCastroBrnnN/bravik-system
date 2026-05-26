@@ -3,16 +3,8 @@ import { MainLayout } from '../components/layout/MainLayout';
 import { Plus } from 'lucide-react';
 import { StatusBadge } from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
-
-const pedidos = [
-  { numero: 'PED-001', cliente: 'Indústria ABC', produto: 'Peça X-100', quantidade: 500, prazo: '15/05/2026', status: 'entregue' as const },
-  { numero: 'PED-002', cliente: 'Metalúrgica XYZ', produto: 'Componente Y-50', quantidade: 300, prazo: '20/05/2026', status: 'producao' as const },
-  { numero: 'PED-003', cliente: 'Fábrica Tech', produto: 'Peça Z-200', quantidade: 800, prazo: '05/05/2026', status: 'atrasado' as const },
-  { numero: 'PED-004', cliente: 'Mecânica Plus', produto: 'Kit A-75', quantidade: 200, prazo: '25/05/2026', status: 'producao' as const },
-  { numero: 'PED-005', cliente: 'Indústria ABC', produto: 'Conjunto B-150', quantidade: 400, prazo: '30/05/2026', status: 'pendente' as const },
-  { numero: 'PED-006', cliente: 'Fábrica Tech', produto: 'Motor A-200', quantidade: 150, prazo: '10/06/2026', status: 'entregue' as const },
-  { numero: 'PED-007', cliente: 'Metalúrgica XYZ', produto: 'Peça Y-80', quantidade: 600, prazo: '22/05/2026', status: 'producao' as const },
-];
+import { usePedidos } from '../context/PedidosContext';
+import { useClientes } from '../context/ClientesContext';
 
 const statusCards = [
   { label: 'Em orçamento', count: 12, color: 'bg-yellow-500', statusValue: 'pendente' },
@@ -26,9 +18,63 @@ export function Pedidos() {
   const [filtroStatus, setFiltroStatus] = useState<string>('todos');
   const navigate = useNavigate();
 
+  const { pedidos, cadastrarPedido } = usePedidos();
+  const { clientes } = useClientes();
+
+  const [novoPedido, setNovoPedido] = useState({
+    cliente_id: '',
+    produto: '',
+    quantidade: '',
+    valor: '',
+    prazo: '',
+  });
+
+  const getNomeCliente = (clienteId: number) => {
+    const cliente = clientes.find((c) => c.id === clienteId);
+    return cliente ? cliente.nome : 'Cliente não encontrado';
+  };
+
   const pedidosFiltrados = filtroStatus === 'todos'
     ? pedidos
     : pedidos.filter(p => p.status === filtroStatus);
+
+  const gerarNumeroPedido = () => {
+    const proximoNumero = pedidos.length + 1;
+    return `PED-${String(proximoNumero).padStart(3, '0')}`;
+  };
+
+  const handleCriarPedido = async () => {
+    if (
+      !novoPedido.cliente_id ||
+      !novoPedido.produto ||
+      !novoPedido.quantidade ||
+      !novoPedido.valor ||
+      !novoPedido.prazo
+    ) {
+      return;
+    }
+
+    await cadastrarPedido({
+      cliente_id: Number(novoPedido.cliente_id),
+      numero: gerarNumeroPedido(),
+      produto: novoPedido.produto,
+      quantidade: Number(novoPedido.quantidade),
+      valor: novoPedido.valor,
+      data: new Date().toISOString().split('T')[0],
+      prazo: novoPedido.prazo,
+      status: 'aguardando',
+    });
+
+    setNovoPedido({
+      cliente_id: '',
+      produto: '',
+      quantidade: '',
+      valor: '',
+      prazo: '',
+    });
+
+    setShowModal(false);
+  };
 
   return (
     <MainLayout>
@@ -50,51 +96,46 @@ export function Pedidos() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setFiltroStatus('todos')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroStatus === 'todos'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === 'todos'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
           >
             Todos
           </button>
           <button
-            onClick={() => setFiltroStatus('pendente')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroStatus === 'pendente'
-                ? 'bg-yellow-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            onClick={() => setFiltroStatus('aguardando')}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === 'aguardando'
+              ? 'bg-yellow-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
           >
-            Em Orçamento
+            Aguardando
           </button>
           <button
             onClick={() => setFiltroStatus('producao')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroStatus === 'producao'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === 'producao'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
           >
             Produção
           </button>
           <button
             onClick={() => setFiltroStatus('atrasado')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroStatus === 'atrasado'
-                ? 'bg-orange-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === 'atrasado'
+              ? 'bg-orange-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
           >
             Finalizados
           </button>
           <button
             onClick={() => setFiltroStatus('entregue')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroStatus === 'entregue'
-                ? 'bg-green-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === 'entregue'
+              ? 'bg-green-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
           >
             Entregues
           </button>
@@ -132,7 +173,9 @@ export function Pedidos() {
                     className="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
                   >
                     <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{pedido.numero}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{pedido.cliente}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                      {getNomeCliente(pedido.cliente_id)}
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{pedido.produto}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{pedido.quantidade}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{pedido.prazo}</td>
@@ -154,11 +197,21 @@ export function Pedidos() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Cliente</label>
-                  <select className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option>Selecione um cliente</option>
-                    <option>Indústria ABC</option>
-                    <option>Metalúrgica XYZ</option>
-                    <option>Fábrica Tech</option>
+                  <select
+                    value={novoPedido.cliente_id}
+                    onChange={(e) =>
+                      setNovoPedido({ ...novoPedido, cliente_id: e.target.value })
+                    }
+                    className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Selecione um cliente</option>
+                    {clientes
+                      .filter((cliente) => !cliente.inativo)
+                      .map((cliente) => (
+                        <option key={cliente.id} value={cliente.id}>
+                          {cliente.nome}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
@@ -168,6 +221,10 @@ export function Pedidos() {
                     <input
                       type="text"
                       placeholder="Nome do produto"
+                      value={novoPedido.produto}
+                      onChange={(e) =>
+                        setNovoPedido({ ...novoPedido, produto: e.target.value })
+                      }
                       className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -176,6 +233,10 @@ export function Pedidos() {
                     <input
                       type="number"
                       placeholder="0"
+                      value={novoPedido.quantidade}
+                      onChange={(e) =>
+                        setNovoPedido({ ...novoPedido, quantidade: e.target.value })
+                      }
                       className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -187,6 +248,10 @@ export function Pedidos() {
                     <input
                       type="text"
                       placeholder="R$ 0,00"
+                      value={novoPedido.valor}
+                      onChange={(e) =>
+                        setNovoPedido({ ...novoPedido, valor: e.target.value })
+                      }
                       className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -194,6 +259,10 @@ export function Pedidos() {
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prazo</label>
                     <input
                       type="date"
+                      value={novoPedido.prazo}
+                      onChange={(e) =>
+                        setNovoPedido({ ...novoPedido, prazo: e.target.value })
+                      }
                       className="w-full h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -216,7 +285,7 @@ export function Pedidos() {
                     Cancelar
                   </button>
                   <button
-                    onClick={() => setShowModal(false)}
+                    onClick={handleCriarPedido}
                     className="h-12 px-6 bg-[#2563EB] text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
                   >
                     Criar Pedido

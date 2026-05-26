@@ -7,6 +7,7 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ClientesProvider } from './context/ClientesContext';
 import { OrcamentosProvider } from './context/OrcamentosContext';
 import { ProducaoProvider } from './context/ProducaoContext';
+import { PedidosProvider } from './context/PedidosContext';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Clientes } from './pages/Clientes';
@@ -58,30 +59,34 @@ export default function App() {
   return (
     <ThemeProvider>
       <NotificationProvider>
-      <ClientesProvider>
-      <OrcamentosProvider>
-      <ProducaoProvider>
-      <BrowserRouter>
-        <Toaster position="top-right" richColors />
-        <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-<Route path="/login" element={<Login />} />
+        <ClientesProvider>
+          <PedidosProvider>
+            <OrcamentosProvider>
+              <ProducaoProvider>
+                <BrowserRouter>
+                  <Toaster position="top-right" richColors />
 
-<Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-<Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
-<Route path="/clientes/:id" element={<ProtectedRoute><ClienteDetalhes /></ProtectedRoute>} />
-<Route path="/pedidos" element={<ProtectedRoute><Pedidos /></ProtectedRoute>} />
-<Route path="/pedidos/:id" element={<ProtectedRoute><PedidoDetalhes /></ProtectedRoute>} />
-<Route path="/producao" element={<ProtectedRoute><Producao /></ProtectedRoute>} />
-<Route path="/orcamentos" element={<ProtectedRoute><Orcamentos /></ProtectedRoute>} />
-<Route path="/orcamentos/:id" element={<ProtectedRoute><OrcamentoDetalhes /></ProtectedRoute>} />
-<Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
-<Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
-      </Routes>
-    </BrowserRouter>
-      </ProducaoProvider>
-      </OrcamentosProvider>
-      </ClientesProvider>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/login" element={<Login />} />
+
+                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                    <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+                    <Route path="/clientes/:id" element={<ProtectedRoute><ClienteDetalhes /></ProtectedRoute>} />
+                    <Route path="/pedidos" element={<ProtectedRoute><Pedidos /></ProtectedRoute>} />
+                    <Route path="/pedidos/:id" element={<ProtectedRoute><PedidoDetalhes /></ProtectedRoute>} />
+                    <Route path="/producao" element={<ProtectedRoute><Producao /></ProtectedRoute>} />
+                    <Route path="/orcamentos" element={<ProtectedRoute><Orcamentos /></ProtectedRoute>} />
+                    <Route path="/orcamentos/:id" element={<ProtectedRoute><OrcamentoDetalhes /></ProtectedRoute>} />
+                    <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
+                    <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
+                  </Routes>
+
+                </BrowserRouter>
+              </ProducaoProvider>
+            </OrcamentosProvider>
+          </PedidosProvider>
+        </ClientesProvider>
       </NotificationProvider>
     </ThemeProvider>
   );
