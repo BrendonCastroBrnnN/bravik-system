@@ -328,8 +328,15 @@ export function Clientes() {
                       }
                       className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <input type="text" placeholder="Nome Fantasia" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     <input
+                      type="text"
+                      placeholder="Responsável"
+                      value={novoCliente.responsavel}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, responsavel: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />                    <input
                       type="text"
                       placeholder="CNPJ"
                       value={novoCliente.cnpj}
@@ -344,31 +351,38 @@ export function Clientes() {
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Contato</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input
-  type="email"
-  placeholder="Email"
-  value={novoCliente.email}
-  onChange={(e) =>
-    setNovoCliente({ ...novoCliente, email: e.target.value })
-  }
-  className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
+                      type="email"
+                      placeholder="Email"
+                      value={novoCliente.email}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, email: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                     <input
-  type="tel"
-  placeholder="Telefone"
-  value={novoCliente.telefone}
-  onChange={(e) =>
-    setNovoCliente({ ...novoCliente, telefone: e.target.value })
-  }
-  className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-/>
+                      type="tel"
+                      placeholder="Telefone"
+                      value={novoCliente.telefone}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, telefone: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Endereço</h3>
                   <div className="grid grid-cols-2 gap-4">
                     <input type="text" placeholder="CEP" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    <input type="text" placeholder="Cidade" className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
+                    <input
+                      type="text"
+                      placeholder="Endereço"
+                      value={novoCliente.endereco}
+                      onChange={(e) =>
+                        setNovoCliente({ ...novoCliente, endereco: e.target.value })
+                      }
+                      className="h-12 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />                  </div>
                 </div>
                 <div className="flex gap-3 justify-end pt-4">
                   <button onClick={() => setShowModal(false)} className="h-12 px-6 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
