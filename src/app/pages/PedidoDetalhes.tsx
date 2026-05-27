@@ -9,13 +9,11 @@ export function PedidoDetalhes() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { pedidos } = usePedidos();
+  const { pedidos, editarStatusPedido } = usePedidos();
   const { clientes } = useClientes();
 
   const pedido = pedidos.find((p) => p.numero === id);
-  const cliente = pedido
-    ? clientes.find((c) => c.id === pedido.cliente_id)
-    : null;
+  const cliente = pedido ? clientes.find((c) => c.id === pedido.cliente_id) : null;
 
   if (!pedido) {
     return (
@@ -38,6 +36,7 @@ export function PedidoDetalhes() {
             >
               <ArrowLeft size={24} className="text-gray-900 dark:text-white" />
             </button>
+
             <div>
               <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
                 {pedido.numero}
@@ -80,11 +79,26 @@ export function PedidoDetalhes() {
             <div className="flex items-center gap-3 mb-3">
               <Clock className="text-orange-600" size={24} />
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
               Status
-            </div>
-            <div className="font-medium text-gray-900 dark:text-white">
-              {pedido.status}
+            </p>
+            <div className="flex items-center gap-3">
+              <StatusBadge status={pedido.status} />
+
+              <select
+                value={pedido.status}
+                onChange={(e) =>
+                  editarStatusPedido(
+                    pedido.id,
+                    e.target.value as 'aguardando' | 'producao' | 'entregue'
+                  )
+                }
+                className="h-10 px-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="aguardando">Aguardando</option>
+                <option value="producao">Produção</option>
+                <option value="entregue">Entregue</option>
+              </select>
             </div>
           </div>
 
