@@ -82,9 +82,17 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     };
 
     const editarEtapaProducao = async (id: number, etapa: string) => {
+        const statusAtualizado =
+            etapa === 'concluido'
+                ? 'entregue'
+                : 'producao';
+
         const { data, error } = await supabase
             .from('pedidos')
-            .update({ etapa_producao: etapa })
+            .update({
+                etapa_producao: etapa,
+                status: statusAtualizado,
+            })
             .eq('id', id)
             .select()
             .single();

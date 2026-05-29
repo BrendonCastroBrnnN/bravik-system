@@ -42,6 +42,12 @@ const etapasProducao = [
     labelCurto: 'Expedição',
     colorClass: 'bg-green-500',
   },
+  {
+    key: 'concluido',
+    title: 'Concluído',
+    labelCurto: 'Concluído',
+    colorClass: 'bg-emerald-500',
+  },
 ];
 
 function KanbanCard({
@@ -102,12 +108,12 @@ function KanbanCard({
 export function Producao() {
   const navigate = useNavigate();
   const { pedidos, editarEtapaProducao } = usePedidos();
-  console.log ('PEDIDOS NA PRODUÇÃO:', pedidos);
+  console.log('PEDIDOS NA PRODUÇÃO:', pedidos);
   const { clientes } = useClientes();
 
   const [filtroEtapa, setFiltroEtapa] = useState<string>('todos');
 
-  const pedidosEmProducao = pedidos.filter((pedido) => pedido.status !== 'entregue');
+  const pedidosEmProducao = pedidos;
 
   const getNomeCliente = (clienteId: number) => {
     const cliente = clientes.find((c) => c.id === clienteId);
@@ -140,11 +146,10 @@ export function Producao() {
         <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setFiltroEtapa('todos')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filtroEtapa === 'todos'
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroEtapa === 'todos'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+              }`}
           >
             Todos
           </button>
@@ -153,11 +158,10 @@ export function Producao() {
             <button
               key={etapa.key}
               onClick={() => setFiltroEtapa(etapa.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filtroEtapa === etapa.key
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroEtapa === etapa.key
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+                }`}
             >
               {etapa.title} ({getPedidosPorEtapa(etapa.key).length})
             </button>
