@@ -63,6 +63,7 @@ export function Pedidos() {
       data: new Date().toISOString().split('T')[0],
       prazo: novoPedido.prazo,
       status: 'aguardando',
+      etapa_producao: 'aguardando_materia_prima',
     });
 
     setNovoPedido({
