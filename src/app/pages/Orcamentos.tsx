@@ -167,12 +167,7 @@ export function Orcamentos() {
   const getNomeCliente = (clienteId: number) => {
     const cliente = clientes.find((c) => c.id === clienteId);
     return cliente ? cliente.nome : 'Cliente não encontrado';
-  };
-
-  const gerarNumeroOrcamento = () => {
-    const proximoNumero = orcamentos.length + 1;
-    return `ORC-${String(proximoNumero).padStart(3, '0')}`;
-  };
+  };git
 
   const handleCriarOrcamento = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -190,7 +185,7 @@ export function Orcamentos() {
 
     await cadastrarOrcamento({
       cliente_id: Number(novoOrcamento.cliente_id),
-      numero: gerarNumeroOrcamento(),
+      numero: '',
       produto: novoOrcamento.produto,
       quantidade: Number(novoOrcamento.quantidade),
       valor: novoOrcamento.valor,
@@ -223,11 +218,6 @@ export function Orcamentos() {
     { icon: XCircle, label: 'Rejeitados', count: rejeitados, color: 'bg-red-500' },
   ];
 
-  const gerarNumeroPedido = () => {
-    const proximoNumero = pedidos.length + 1;
-    return `PED-${String(proximoNumero).padStart(3, '0')}`;
-  };
-
   const handleAprovar = async (e: React.MouseEvent, orc: Orcamento) => {
     e.stopPropagation();
 
@@ -236,7 +226,7 @@ export function Orcamentos() {
     const novoPedido = await criarPedidoDeOrcamento({
       orcamento_id: orc.id,
       cliente_id: orc.cliente_id,
-      numero: gerarNumeroPedido(),
+      numero: '',
       produto: orc.produto,
       quantidade: orc.quantidade,
       valor: orc.valor,

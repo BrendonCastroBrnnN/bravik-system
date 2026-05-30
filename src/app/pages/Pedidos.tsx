@@ -38,11 +38,6 @@ export function Pedidos() {
     ? pedidos
     : pedidos.filter(p => p.status === filtroStatus);
 
-  const gerarNumeroPedido = () => {
-    const proximoNumero = pedidos.length + 1;
-    return `PED-${String(proximoNumero).padStart(3, '0')}`;
-  };
-
   const handleCriarPedido = async () => {
     if (
       !novoPedido.cliente_id ||
@@ -56,7 +51,7 @@ export function Pedidos() {
 
     await cadastrarPedido({
       cliente_id: Number(novoPedido.cliente_id),
-      numero: gerarNumeroPedido(),
+      numero: '',
       produto: novoPedido.produto,
       quantidade: Number(novoPedido.quantidade),
       valor: novoPedido.valor,

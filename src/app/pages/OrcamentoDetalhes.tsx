@@ -182,11 +182,6 @@ export function OrcamentoDetalhes() {
     );
   }
 
-  const gerarNumeroPedido = () => {
-    const proximoNumero = pedidos.length + 1;
-    return `PED-${String(proximoNumero).padStart(3, '0')}`;
-  };
-
   const calcularPrazoPedido = () => {
     return orcamento.validade;
   };
@@ -197,7 +192,7 @@ export function OrcamentoDetalhes() {
     const novoPedido = await criarPedidoDeOrcamento({
       orcamento_id: orcamento.id,
       cliente_id: orcamento.cliente_id,
-      numero: gerarNumeroPedido(),
+      numero: '',
       produto: orcamento.produto,
       quantidade: orcamento.quantidade,
       valor: orcamento.valor,

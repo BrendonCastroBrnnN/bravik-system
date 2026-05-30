@@ -64,7 +64,21 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
             return;
         }
 
-        setPedidos((prev) => [...prev, data as Pedido]);
+        const numeroGerado = `PED-${String(data.id).padStart(6, '0')}`;
+
+        const { data: pedidoAtualizado, error: updateError } = await supabase
+            .from('pedidos')
+            .update({ numero: numeroGerado })
+            .eq('id', data.id)
+            .select()
+            .single();
+
+        if (updateError) {
+            console.error('Erro ao gerar número do pedido:', updateError);
+            return;
+        }
+
+        setPedidos((prev) => [...prev, pedidoAtualizado as Pedido]);
     };
 
     const criarPedidoDeOrcamento = async (pedido: Omit<Pedido, 'id'>) => {
@@ -79,9 +93,23 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
             return null;
         }
 
-        setPedidos((prev) => [...prev, data as Pedido]);
+        const numeroGerado = `PED-${String(data.id).padStart(6, '0')}`;
 
-        return data as Pedido;
+        const { data: pedidoAtualizado, error: updateError } = await supabase
+            .from('pedidos')
+            .update({ numero: numeroGerado })
+            .eq('id', data.id)
+            .select()
+            .single();
+
+        if (updateError) {
+            console.error('Erro ao gerar número do pedido:', updateError);
+            return null;
+        }
+
+        setPedidos((prev) => [...prev, pedidoAtualizado as Pedido]);
+
+        return pedidoAtualizado as Pedido;
     };
 
     const atualizarPedidoPorOrcamento = async (

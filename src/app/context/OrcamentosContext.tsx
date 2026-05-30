@@ -61,7 +61,21 @@ export function OrcamentosProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setOrcamentos((prev) => [...prev, data as Orcamento]);
+    const numeroGerado = `ORC-${String(data.id).padStart(6, '0')}`;
+
+    const { data: orcamentoAtualizado, error: updateError } = await supabase
+      .from('orcamentos')
+      .update({ numero: numeroGerado })
+      .eq('id', data.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Erro ao gerar número do orçamento:', updateError);
+      return;
+    }
+
+    setOrcamentos((prev) => [...prev, orcamentoAtualizado as Orcamento]);
   };
 
   const alterarSituacao = async (id: number, situacao: SituacaoOrcamento) => {
