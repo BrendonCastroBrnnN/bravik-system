@@ -16,6 +16,8 @@ import { StatusBadge } from '../components/StatusBadge';
 import { toast } from 'sonner';
 import { useOrcamentos, Orcamento } from '../context/OrcamentosContext';
 import { useClientes } from '../context/ClientesContext';
+import { usePedidos } from '../context/PedidosContext';
+
 
 const inputCls =
   'w-full h-11 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -41,8 +43,8 @@ function EditModal({ orc, onClose, onSave }: EditModalProps) {
 
   const set =
     (k: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setForm((p) => ({ ...p, [k]: e.target.value }));
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+        setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const handleSave = () => {
     onSave({
@@ -159,6 +161,8 @@ export function OrcamentoDetalhes() {
   const { orcamentos, alterarSituacao, editar } = useOrcamentos();
   const { clientes } = useClientes();
 
+  const { pedidos, criarPedidoDeOrcamento, atualizarPedidoPorOrcamento } = usePedidos();
+
   const [showEdit, setShowEdit] = useState(false);
 
   const orcamento = orcamentos.find((o) => o.numero === id);
@@ -178,9 +182,39 @@ export function OrcamentoDetalhes() {
     );
   }
 
+  const gerarNumeroPedido = () => {
+    const proximoNumero = pedidos.length + 1;
+    return `PED-${String(proximoNumero).padStart(3, '0')}`;
+  };
+
+  const calcularPrazoPedido = () => {
+    return orcamento.validade;
+  };
+
   const handleAprovar = async () => {
     await alterarSituacao(orcamento.id, 'aprovado');
-    toast.success(`Orçamento ${orcamento.numero} aprovado.`);
+
+    const novoPedido = await criarPedidoDeOrcamento({
+      orcamento_id: orcamento.id,
+      cliente_id: orcamento.cliente_id,
+      numero: gerarNumeroPedido(),
+      produto: orcamento.produto,
+      quantidade: orcamento.quantidade,
+      valor: orcamento.valor,
+      data: new Date().toISOString().split('T')[0],
+      prazo: calcularPrazoPedido(),
+      status: 'aguardando',
+      etapa_producao: 'aguardando_materia_prima',
+    });
+
+    if (!novoPedido) {
+      toast.error('Orçamento aprovado, mas houve erro ao gerar o pedido.');
+      return;
+    }
+
+    toast.success(`Orçamento ${orcamento.numero} aprovado e pedido ${novoPedido.numero} gerado.`);
+
+    navigate(`/pedidos/${novoPedido.numero}`);
   };
 
   const handleRejeitar = async () => {
@@ -386,7 +420,18 @@ export function OrcamentoDetalhes() {
         <EditModal
           orc={orcamento}
           onClose={() => setShowEdit(false)}
-          onSave={(dados) => editar(orcamento.id, dados)}
+          onSave={async (dados) => {
+            await editar(orcamento.id, dados);
+
+            if (orcamento.situacao === 'aprovado') {
+              await atualizarPedidoPorOrcamento(orcamento.id, {
+                cliente_id: dados.cliente_id ?? orcamento.cliente_id,
+                produto: dados.produto ?? orcamento.produto,
+                quantidade: dados.quantidade ?? orcamento.quantidade,
+                valor: dados.valor ?? orcamento.valor,
+              });
+            }
+          }}
         />
       )}
     </MainLayout>

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useOrcamentos, SituacaoOrcamento, Orcamento } from '../context/OrcamentosContext';
 import { useClientes } from '../context/ClientesContext';
+import { usePedidos } from '../context/PedidosContext';
 
 const inputCls =
   'w-full h-11 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder:text-gray-400 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500';
@@ -31,8 +32,8 @@ function EditModal({ orc, onClose, onSave }: EditModalProps) {
 
   const set =
     (k: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-      setForm((p) => ({ ...p, [k]: e.target.value }));
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+        setForm((p) => ({ ...p, [k]: e.target.value }));
 
   const handleSave = () => {
     onSave({
@@ -148,6 +149,8 @@ export function Orcamentos() {
   const { orcamentos, cadastrarOrcamento, alterarSituacao, editar } = useOrcamentos();
   const { clientes } = useClientes();
 
+  const { pedidos, criarPedidoDeOrcamento } = usePedidos();
+
   const [showNovoModal, setShowNovoModal] = useState(false);
   const [editando, setEditando] = useState<Orcamento | null>(null);
   const [filtroStatus, setFiltroStatus] = useState<'todos' | SituacaoOrcamento>('todos');
@@ -220,10 +223,35 @@ export function Orcamentos() {
     { icon: XCircle, label: 'Rejeitados', count: rejeitados, color: 'bg-red-500' },
   ];
 
-  const handleAprovar = (e: React.MouseEvent, id: number, numero: string) => {
+  const gerarNumeroPedido = () => {
+    const proximoNumero = pedidos.length + 1;
+    return `PED-${String(proximoNumero).padStart(3, '0')}`;
+  };
+
+  const handleAprovar = async (e: React.MouseEvent, orc: Orcamento) => {
     e.stopPropagation();
-    alterarSituacao(id, 'aprovado');
-    toast.success(`Orçamento ${numero} aprovado.`);
+
+    await alterarSituacao(orc.id, 'aprovado');
+
+    const novoPedido = await criarPedidoDeOrcamento({
+      orcamento_id: orc.id,
+      cliente_id: orc.cliente_id,
+      numero: gerarNumeroPedido(),
+      produto: orc.produto,
+      quantidade: orc.quantidade,
+      valor: orc.valor,
+      data: new Date().toISOString().split('T')[0],
+      prazo: orc.validade,
+      status: 'aguardando',
+      etapa_producao: 'aguardando_materia_prima',
+    });
+
+    if (!novoPedido) {
+      toast.error('Orçamento aprovado, mas houve erro ao gerar o pedido.');
+      return;
+    }
+
+    toast.success(`Orçamento ${orc.numero} aprovado e pedido ${novoPedido.numero} gerado.`);
   };
 
   const handleRejeitar = (e: React.MouseEvent, id: number, numero: string) => {
@@ -271,11 +299,10 @@ export function Orcamentos() {
             <button
               key={f.value}
               onClick={() => setFiltroStatus(f.value)}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filtroStatus === f.value
-                  ? f.active
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroStatus === f.value
+                ? f.active
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
             >
               {f.label}
             </button>
@@ -353,7 +380,7 @@ export function Orcamentos() {
                         {orc.situacao === 'pendente' && (
                           <>
                             <button
-                              onClick={(e) => handleAprovar(e, orc.id, orc.numero)}
+                              onClick={(e) => handleAprovar(e, orc)}
                               className="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 rounded-lg text-xs font-medium hover:bg-green-200 transition-colors"
                             >
                               Aprovar

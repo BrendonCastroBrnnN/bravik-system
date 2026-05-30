@@ -6,6 +6,7 @@ export type StatusPedido = 'producao' | 'entregue' | 'aguardando';
 export interface Pedido {
     id: number;
     cliente_id: number;
+    orcamento_id?: number | null;
     numero: string;
     produto: string;
     quantidade: number;
@@ -19,6 +20,11 @@ export interface Pedido {
 interface PedidosContextType {
     pedidos: Pedido[];
     cadastrarPedido: (pedido: Omit<Pedido, 'id'>) => Promise<void>;
+    criarPedidoDeOrcamento: (pedido: Omit<Pedido, 'id'>) => Promise<Pedido | null>;
+    atualizarPedidoPorOrcamento: (
+        orcamentoId: number,
+        dados: Partial<Omit<Pedido, 'id'>>
+    ) => Promise<void>;
     editarStatusPedido: (id: number, status: StatusPedido) => Promise<void>;
     editarEtapaProducao: (id: number, etapa: string) => Promise<void>;
 }
@@ -59,6 +65,46 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
         }
 
         setPedidos((prev) => [...prev, data as Pedido]);
+    };
+
+    const criarPedidoDeOrcamento = async (pedido: Omit<Pedido, 'id'>) => {
+        const { data, error } = await supabase
+            .from('pedidos')
+            .insert([pedido])
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Erro ao criar pedido a partir do orçamento:', error);
+            return null;
+        }
+
+        setPedidos((prev) => [...prev, data as Pedido]);
+
+        return data as Pedido;
+    };
+
+    const atualizarPedidoPorOrcamento = async (
+        orcamentoId: number,
+        dados: Partial<Omit<Pedido, 'id'>>
+    ) => {
+        const { data, error } = await supabase
+            .from('pedidos')
+            .update(dados)
+            .eq('orcamento_id', orcamentoId)
+            .select();
+
+        if (error) {
+            console.error('Erro ao atualizar pedido vinculado ao orçamento:', error);
+            return;
+        }
+
+        setPedidos((prev) =>
+            prev.map((pedido) => {
+                const pedidoAtualizado = data?.find((p) => p.id === pedido.id);
+                return pedidoAtualizado ? (pedidoAtualizado as Pedido) : pedido;
+            })
+        );
     };
 
     const editarStatusPedido = async (id: number, status: StatusPedido) => {
@@ -110,7 +156,16 @@ export function PedidosProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <PedidosContext.Provider value={{ pedidos, cadastrarPedido, editarStatusPedido, editarEtapaProducao }}>
+        <PedidosContext.Provider
+            value={{
+                pedidos,
+                cadastrarPedido,
+                criarPedidoDeOrcamento,
+                atualizarPedidoPorOrcamento,
+                editarStatusPedido,
+                editarEtapaProducao,
+            }}
+        >
             {children}
         </PedidosContext.Provider>
     );
