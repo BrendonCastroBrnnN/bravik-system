@@ -1,32 +1,55 @@
+import { useClientes } from '../context/ClientesContext';
+import { usePedidos } from '../context/PedidosContext';
+import { useOrcamentos } from '../context/OrcamentosContext';
 import { MainLayout } from '../components/layout/MainLayout';
-import { Package, Factory, CheckCircle, Users } from 'lucide-react';
+import { Package, Factory, CheckCircle, Users, FileText } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { StatusBadge } from '../components/StatusBadge';
 
-const statsCards = [
-  { icon: Package, label: 'Pedidos em aberto', value: '128', color: 'bg-blue-500' },
-  { icon: Factory, label: 'Em produção', value: '42', color: 'bg-orange-500' },
-  { icon: CheckCircle, label: 'Entregues', value: '350', color: 'bg-green-500' },
-  { icon: Users, label: 'Clientes', value: '89', color: 'bg-purple-500' },
-];
-
-const chartData = [
-  { id: 'jan', mes: 'Jan', pedidos: 65 },
-  { id: 'fev', mes: 'Fev', pedidos: 78 },
-  { id: 'mar', mes: 'Mar', pedidos: 90 },
-  { id: 'abr', mes: 'Abr', pedidos: 81 },
-  { id: 'mai', mes: 'Mai', pedidos: 95 },
-  { id: 'jun', mes: 'Jun', pedidos: 110 },
-];
-
-const recentOrders = [
-  { id: 'PED-001', cliente: 'Indústria ABC', produto: 'Peça X-100', status: 'entregue' as const, prazo: '15/05/2026' },
-  { id: 'PED-002', cliente: 'Metalúrgica XYZ', produto: 'Componente Y-50', status: 'producao' as const, prazo: '20/05/2026' },
-  { id: 'PED-003', cliente: 'Fábrica Tech', produto: 'Peça Z-200', status: 'atrasado' as const, prazo: '05/05/2026' },
-  { id: 'PED-004', cliente: 'Mecânica Plus', produto: 'Kit A-75', status: 'producao' as const, prazo: '25/05/2026' },
-];
-
 export function Dashboard() {
+
+  const { clientes } = useClientes();
+  const { pedidos } = usePedidos();
+  const { orcamentos } = useOrcamentos();
+
+  const pedidosEmAberto = pedidos.filter((p) => p.status !== 'entregue').length;
+  const pedidosEmProducao = pedidos.filter((p) => p.status === 'producao').length;
+  const pedidosEntregues = pedidos.filter((p) => p.status === 'entregue').length;
+  const clientesAtivos = clientes.filter((c) => !c.inativo).length;
+  const orcamentosPendentes = orcamentos.filter((o) => o.situacao === 'pendente').length;
+
+  const statsCards = [
+    { icon: Package, label: 'Pedidos em aberto', value: String(pedidosEmAberto), color: 'bg-blue-500' },
+    { icon: Factory, label: 'Em produção', value: String(pedidosEmProducao), color: 'bg-orange-500' },
+    { icon: CheckCircle, label: 'Entregues', value: String(pedidosEntregues), color: 'bg-green-500' },
+    { icon: Users, label: 'Clientes ativos', value: String(clientesAtivos), color: 'bg-purple-500' },
+    { icon: FileText, label: 'Orçamentos pendentes', value: String(orcamentosPendentes), color: 'bg-yellow-500' },
+  ];
+
+  const ultimosPedidos = [...pedidos]
+    .sort((a, b) => b.id - a.id)
+    .slice(0, 10);
+
+  const getNomeCliente = (clienteId: number) => {
+    const cliente = clientes.find((c) => c.id === clienteId);
+    return cliente?.nome ?? 'Cliente não encontrado';
+  };
+
+  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+  const chartData = meses.map((mes, index) => {
+    const totalPedidos = pedidos.filter((pedido) => {
+      const dataPedido = new Date(pedido.data);
+      return dataPedido.getMonth() === index;
+    }).length;
+
+    return {
+      id: mes.toLowerCase(),
+      mes,
+      pedidos: totalPedidos,
+    };
+  });
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -81,10 +104,10 @@ export function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {recentOrders.map((order) => (
+                {ultimosPedidos.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{order.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{order.cliente}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{order.numero}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{getNomeCliente(order.cliente_id)}</td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">{order.produto}</td>
                     <td className="px-6 py-4">
                       <StatusBadge status={order.status} />
