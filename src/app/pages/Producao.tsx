@@ -4,6 +4,7 @@ import { Clock, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePedidos, Pedido } from '../context/PedidosContext';
 import { useClientes } from '../context/ClientesContext';
+import { useAuth } from '../context/AuthContext';
 
 const etapasProducao = [
   {
@@ -53,11 +54,13 @@ const etapasProducao = [
 function KanbanCard({
   pedido,
   clienteNome,
+  podeEditar,
   onClick,
   onChangeEtapa,
 }: {
   pedido: Pedido;
   clienteNome: string;
+  podeEditar: boolean;
   onClick: () => void;
   onChangeEtapa: (etapa: string) => void;
 }) {
@@ -90,17 +93,23 @@ function KanbanCard({
         </div>
       </div>
 
-      <select
-        value={pedido.etapa_producao}
-        onChange={(e) => onChangeEtapa(e.target.value)}
-        className="w-full h-9 px-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        {etapasProducao.map((etapa) => (
-          <option key={etapa.key} value={etapa.key}>
-            {etapa.title}
-          </option>
-        ))}
-      </select>
+      {podeEditar ? (
+        <select
+          value={pedido.etapa_producao}
+          onChange={(e) => onChangeEtapa(e.target.value)}
+          className="w-full h-9 px-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {etapasProducao.map((etapa) => (
+            <option key={etapa.key} value={etapa.key}>
+              {etapa.title}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div className="w-full h-9 px-2 flex items-center bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs">
+          {etapasProducao.find((etapa) => etapa.key === pedido.etapa_producao)?.title || 'Etapa não encontrada'}
+        </div>
+      )}
     </div>
   );
 }
@@ -110,6 +119,10 @@ export function Producao() {
   const { pedidos, editarEtapaProducao } = usePedidos();
   console.log('PEDIDOS NA PRODUÇÃO:', pedidos);
   const { clientes } = useClientes();
+
+  const { isAdmin, isProducao } = useAuth();
+
+  const podeEditarProducao = isAdmin || isProducao;
 
   const [filtroEtapa, setFiltroEtapa] = useState<string>('todos');
 
@@ -147,8 +160,8 @@ export function Producao() {
           <button
             onClick={() => setFiltroEtapa('todos')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroEtapa === 'todos'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
           >
             Todos
@@ -159,8 +172,8 @@ export function Producao() {
               key={etapa.key}
               onClick={() => setFiltroEtapa(etapa.key)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${filtroEtapa === etapa.key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
             >
               {etapa.title} ({getPedidosPorEtapa(etapa.key).length})
@@ -193,6 +206,7 @@ export function Producao() {
                       key={pedido.id}
                       pedido={pedido}
                       clienteNome={getNomeCliente(pedido.cliente_id)}
+                      podeEditar={podeEditarProducao}
                       onClick={() => navigate(`/pedidos/${pedido.numero}`)}
                       onChangeEtapa={(novaEtapa) =>
                         editarEtapaProducao(pedido.id, novaEtapa)

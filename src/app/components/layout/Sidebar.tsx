@@ -10,18 +10,54 @@ import {
   X
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import bravikLogoLight from '@/imports/BravikBG.png';
-import bravikLogoDark from '@/imports/BravikBGBR.png';
+import bravikLogoLight from '../../../imports/BravikBG.png';
+import bravikLogoDark from '../../../imports/BravikBGBR.png';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: Users, label: 'Clientes', path: '/clientes' },
-  { icon: ShoppingCart, label: 'Pedidos', path: '/pedidos' },
-  { icon: Factory, label: 'Produção', path: '/producao' },
-  { icon: FileText, label: 'Orçamentos', path: '/orcamentos' },
-  { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
-  { icon: Settings, label: 'Configurações', path: '/configuracoes' },
+  {
+    icon: LayoutDashboard,
+    label: 'Dashboard',
+    path: '/dashboard',
+    perfis: ['admin', 'comercial', 'producao'],
+  },
+  {
+    icon: Users,
+    label: 'Clientes',
+    path: '/clientes',
+    perfis: ['admin', 'comercial'],
+  },
+  {
+    icon: ShoppingCart,
+    label: 'Pedidos',
+    path: '/pedidos',
+    perfis: ['admin', 'comercial', 'producao'],
+  },
+  {
+    icon: Factory,
+    label: 'Produção',
+    path: '/producao',
+    perfis: ['admin', 'comercial', 'producao'],
+  },
+  {
+    icon: FileText,
+    label: 'Orçamentos',
+    path: '/orcamentos',
+    perfis: ['admin', 'comercial'],
+  },
+  {
+    icon: BarChart3,
+    label: 'Relatórios',
+    path: '/relatorios',
+    perfis: ['admin'],
+  },
+  {
+    icon: Settings,
+    label: 'Configurações',
+    path: '/configuracoes',
+    perfis: ['admin', 'comercial', 'producao'],
+  },
 ];
 
 interface SidebarProps {
@@ -33,6 +69,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { perfil, carregandoPerfil } = useAuth();
   const bravikLogo = isDarkMode ? bravikLogoDark : bravikLogoLight;
 
   const handleSair = () => {
@@ -43,6 +80,13 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const handleLinkClick = () => {
     onClose?.();
   };
+
+  const menuItemsFiltrados = menuItems.filter((item) => {
+  if (carregandoPerfil) return false;
+  if (!perfil) return false;
+
+  return item.perfis.includes(perfil.perfil);
+});
 
   return (
     <>
@@ -78,7 +122,7 @@ export function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         </div>
 
         <nav className="flex-1 px-4 space-y-1">
-          {menuItems.map((item) => {
+          {menuItemsFiltrados.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
 

@@ -4,7 +4,9 @@ import { Moon, Sun, User, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTheme } from '../context/ThemeContext';
 
+
 export function Configuracoes() {
+  
   const { isDarkMode, toggleDarkMode } = useTheme();
   const [nomeUsuario, setNomeUsuario] = useState('Admin');
   const [senhaAtual, setSenhaAtual] = useState('');
@@ -69,14 +71,12 @@ export function Configuracoes() {
 
             <button
               onClick={handleToggleDarkMode}
-              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
-                isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
+              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${isDarkMode ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
             >
               <span
-                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
-                  isDarkMode ? 'translate-x-7' : 'translate-x-1'
-                }`}
+                className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${isDarkMode ? 'translate-x-7' : 'translate-x-1'
+                  }`}
               />
             </button>
           </div>
